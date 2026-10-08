@@ -1,0 +1,12 @@
+{"error": null, "hits": 2, "facets": {}, "content": null, "jobs": [
+  {"id": "3100001", "id_icims": "3100001", "title": "Software Development Engineer I, AWS", "company_name": "Amazon Web Services Canada, Inc.",
+   "city": "Vancouver", "state": "BC", "country_code": "CAN", "location": "CA, BC, Vancouver", "normalized_location": "Vancouver, British Columbia, CAN",
+   "posted_date": "October 7, 2026", "updated_time": "1 day", "job_path": "/en/jobs/3100001/software-development-engineer-i-aws",
+   "description": "Build distributed systems in Java and Python.",
+   "basic_qualifications": "- 1+ years of non-internship professional software development experience<br/>- Experience programming with at least one software programming language",
+   "preferred_qualifications": "- 3+ years of full software development life cycle experience",
+   "job_category": "Software Development", "job_schedule_type": "full-time"},
+  {"id": "3100002", "id_icims": "3100002", "title": "Senior Software Development Engineer", "city": "Seattle", "state": "WA", "country_code": "USA",
+   "location": "US, WA, Seattle", "normalized_location": "Seattle, Washington, USA", "posted_date": "October 1, 2026",
+   "job_path": "/en/jobs/3100002/senior-sde", "description": "Lead.", "basic_qualifications": "- 5+ years of professional software development experience"}
+]}

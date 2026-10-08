@@ -1,0 +1,114 @@
+# Pipeline settings. Everything here is safe to tweak; no code changes needed.
+
+fetch:
+  workers: 8                    # parallel boards
+  per_host_interval: 0.5        # seconds between requests to the same host (politeness)
+  max_pages: 50                 # safety cap for paginated APIs
+  close_after_missed_runs: 2    # posting disappears for N consecutive successful fetches -> closed
+
+filters:
+  # Title must match at least one include term (case-insensitive, whole-word). "re:" = regex.
+  title_include:
+    - software engineer
+    - software developer
+    - software development engineer
+    - software dev engineer
+    - software engineering
+    - sde
+    - swe
+    - backend engineer
+    - back-end engineer
+    - back end engineer
+    - backend developer
+    - full stack
+    - full-stack
+    - fullstack
+    - application developer
+    - applications developer
+    - web developer
+    - platform engineer
+    - product engineer
+    - api engineer
+    - member of technical staff
+    - "re:\\bengineer\\b.*\\b(backend|back-end|full[- ]?stack|platform|api|infrastructure|distributed)\\b"
+  title_exclude:
+    - senior
+    - sr
+    - sr.
+    - staff
+    - principal
+    - lead
+    - manager
+    - director
+    - head of
+    - architect
+    - vp
+    - distinguished
+    - intern
+    - internship
+    - co-op
+    - coop
+    - firmware
+    - hardware
+    - embedded
+    - mechanical
+    - electrical
+    - silicon
+    - asic
+    - fpga
+    - sales
+    - solutions engineer
+    - support engineer
+    - test engineer
+    - qa
+    - clearance
+    - ts/sci
+  # level_guess values to drop (see normalize.guess_level)
+  exclude_levels: [senior, staff+, lead, manager, intern]
+  max_required_yoe: 4           # drop postings that require 5+ years
+  countries: [CA, US]           # on-site / hybrid anywhere in these
+  remote_scopes: [Canada, North America, Global]   # US-only remote is excluded unless Canada is OK
+  allow_unspecified_remote: false
+  allow_unknown_location: true
+
+scoring:
+  skill_max: 70                 # points available for skill fit
+  llm_enabled: true             # only used when ANTHROPIC_API_KEY is set
+  llm_model: claude-haiku-5-5   # cheapest current Claude model
+  llm_weight: 0.65              # share of skill fit from the LLM (rest = keyword overlap)
+  llm_max_calls_per_run: 40     # cost guard; unscored postings carry over to the next run
+  location_weights:
+    cities: {vancouver: 15, burnaby: 15, ottawa: 5, toronto: 5}
+    remote_canada: 10
+    remote_north_america: 5
+    canada_other: 2
+    us: 0
+    default: 0
+  tier_bonus: {1: 15, 2: 7, 3: 0}
+  freshness:
+    buckets:
+      - {max_hours: 24, points: 10}
+      - {max_hours: 72, points: 5}
+      - {max_hours: 168, points: 2}
+
+alerts:
+  timezone: America/Toronto
+  instant_score: 80             # Tier 1 always alerts; others need this score
+  instant_max_age_days: 7       # don't instant-alert on old postings discovered late
+  instant_max_per_run: 10
+  digest_hour: 8                # local time; the first run at/after this hour sends the digest
+  digest_max_per_section: 25
+  weekly_weekday: 0             # Monday
+  fetcher_failure_runs: 3
+
+sheet:
+  postings_window_days: 21      # new matching postings from the last N days are added
+  prune_closed_after_days: 14   # closed rows with Status new/skipped are removed after N days
+  follow_up_days: 10            # reminder if an active application has no update for N days
+
+# Community-maintained GitHub job lists (README tables). Raw README URLs only.
+community_sources:
+  - name: simplify-newgrad
+    url: https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/README.md
+  - name: speedyapply-newgrad-usa
+    url: https://raw.githubusercontent.com/speedyapply/2026-SWE-College-Jobs/main/NEW_GRAD_USA.md

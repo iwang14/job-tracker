@@ -1,0 +1,87 @@
+# Seed list for `python -m jobpipe seed`. ats_type/board_token here are HINTS only: the seed step
+# verifies each against the live API, falls back to detecting from careers_url, then to probing
+# Greenhouse/Lever/Ashby with slug guesses. Output goes to config/companies.candidates.yaml for
+# your review; nothing is added to companies.yaml until you run `python -m jobpipe approve`.
+# --- Canada-headquartered / big Canadian engineering presence ---
+- {name: Shopify, tier: 1, careers_url: "https://www.shopify.com/careers"}
+- {name: Wealthsimple, tier: 2, ats_type: lever, board_token: wealthsimple}
+- {name: Clio, tier: 2, careers_url: "https://www.clio.com/about/careers/"}
+- {name: 1Password, tier: 2, ats_type: ashby, board_token: 1password}
+- {name: Cohere, tier: 2, ats_type: ashby, board_token: cohere}
+- {name: Ada, tier: 3, careers_url: "https://www.ada.cx/careers"}
+- {name: Hootsuite, tier: 3, careers_url: "https://careers.hootsuite.com/"}
+- {name: Jobber, tier: 3, careers_url: "https://www.getjobber.com/about/careers/"}
+- {name: Thinkific, tier: 3, careers_url: "https://www.thinkific.com/careers/"}
+- {name: Lightspeed Commerce, tier: 3, careers_url: "https://www.lightspeedhq.com/careers/"}
+- {name: Faire, tier: 2, ats_type: greenhouse, board_token: faire}
+- {name: Dapper Labs, tier: 3, careers_url: "https://www.dapperlabs.com/careers"}
+- {name: KOHO, tier: 3, careers_url: "https://www.koho.ca/careers"}
+- {name: Neo Financial, tier: 3, careers_url: "https://www.neofinancial.com/careers"}
+- {name: Visier, tier: 3, careers_url: "https://www.visier.com/careers/"}
+- {name: Trulioo, tier: 3, careers_url: "https://www.trulioo.com/company/careers"}
+- {name: Arctic Wolf, tier: 3, careers_url: "https://arcticwolf.com/company/careers/"}
+- {name: D2L, tier: 3, careers_url: "https://www.d2l.com/careers/"}
+- {name: Kinaxis, tier: 3, careers_url: "https://www.kinaxis.com/en/careers"}
+- {name: Coveo, tier: 3, careers_url: "https://www.coveo.com/en/company/careers"}
+- {name: Procurify, tier: 3, careers_url: "https://www.procurify.com/careers/"}
+- {name: Unity, tier: 3, careers_url: "https://careers.unity.com/"}
+- {name: Electronic Arts, tier: 3, careers_url: "https://www.ea.com/careers"}
+- {name: Ubisoft, tier: 3, careers_url: "https://www.ubisoft.com/en-us/company/careers"}
+- {name: RBC, tier: 3, careers_url: "https://jobs.rbc.com/ca/en"}
+- {name: TD Bank, tier: 3, careers_url: "https://jobs.td.com/en-CA/"}
+- {name: OpenText, tier: 3, careers_url: "https://careers.opentext.com/"}
+- {name: Ceridian Dayforce, tier: 3, careers_url: "https://jobs.dayforcehcm.com/"}
+- {name: Wattpad, tier: 3, careers_url: "https://company.wattpad.com/careers"}
+- {name: Benevity, tier: 3, careers_url: "https://benevity.com/careers"}
+- {name: Fullscript, tier: 3, careers_url: "https://fullscript.com/careers"}
+- {name: League, tier: 3, careers_url: "https://league.com/careers/"}
+# --- US / global tech with Canada or broad US hiring ---
+- {name: Atlassian, tier: 1, careers_url: "https://www.atlassian.com/company/careers/all-jobs"}
+- {name: Amazon, tier: 1, ats_type: amazon}
+- {name: Microsoft, tier: 2, ats_type: microsoft, board_token: "apply.careers.microsoft.com|microsoft.com"}
+- {name: Stripe, tier: 2, ats_type: greenhouse, board_token: stripe}
+- {name: Airbnb, tier: 2, ats_type: greenhouse, board_token: airbnb}
+- {name: Coinbase, tier: 2, ats_type: greenhouse, board_token: coinbase}
+- {name: Databricks, tier: 2, ats_type: greenhouse, board_token: databricks}
+- {name: Datadog, tier: 2, ats_type: greenhouse, board_token: datadog}
+- {name: Cloudflare, tier: 2, ats_type: greenhouse, board_token: cloudflare}
+- {name: Figma, tier: 2, ats_type: greenhouse, board_token: figma}
+- {name: Notion, tier: 2, ats_type: ashby, board_token: notion}
+- {name: Ramp, tier: 2, ats_type: ashby, board_token: ramp}
+- {name: Plaid, tier: 2, ats_type: lever, board_token: plaid}
+- {name: Robinhood, tier: 3, ats_type: greenhouse, board_token: robinhood}
+- {name: Dropbox, tier: 3, ats_type: greenhouse, board_token: dropbox}
+- {name: Pinterest, tier: 3, ats_type: greenhouse, board_token: pinterest}
+- {name: Reddit, tier: 3, ats_type: greenhouse, board_token: reddit}
+- {name: Lyft, tier: 3, ats_type: greenhouse, board_token: lyft}
+- {name: DoorDash, tier: 3, careers_url: "https://careers.doordash.com/"}
+- {name: Instacart, tier: 3, ats_type: greenhouse, board_token: instacart}
+- {name: Twilio, tier: 3, ats_type: greenhouse, board_token: twilio}
+- {name: Okta, tier: 3, ats_type: greenhouse, board_token: okta}
+- {name: Elastic, tier: 3, ats_type: greenhouse, board_token: elastic}
+- {name: GitLab, tier: 3, ats_type: greenhouse, board_token: gitlab}
+- {name: MongoDB, tier: 3, ats_type: greenhouse, board_token: mongodb}
+- {name: Snowflake, tier: 3, careers_url: "https://careers.snowflake.com/"}
+- {name: Asana, tier: 3, ats_type: greenhouse, board_token: asana}
+- {name: Brex, tier: 3, ats_type: greenhouse, board_token: brex}
+- {name: Discord, tier: 3, ats_type: greenhouse, board_token: discord}
+- {name: Duolingo, tier: 3, ats_type: greenhouse, board_token: duolingo}
+- {name: Affirm, tier: 2, ats_type: greenhouse, board_token: affirm}
+- {name: Chime, tier: 3, ats_type: greenhouse, board_token: chime}
+- {name: Gusto, tier: 3, ats_type: greenhouse, board_token: gusto}
+- {name: Rippling, tier: 3, careers_url: "https://www.rippling.com/careers"}
+- {name: Samsara, tier: 3, ats_type: greenhouse, board_token: samsara}
+- {name: Scale AI, tier: 3, ats_type: greenhouse, board_token: scaleai}
+- {name: Vercel, tier: 3, ats_type: greenhouse, board_token: vercel}
+- {name: Retool, tier: 3, careers_url: "https://retool.com/careers"}
+- {name: Airtable, tier: 3, ats_type: greenhouse, board_token: airtable}
+- {name: Benchling, tier: 3, careers_url: "https://www.benchling.com/careers"}
+- {name: Grammarly, tier: 3, careers_url: "https://www.grammarly.com/jobs"}
+- {name: HubSpot, tier: 3, careers_url: "https://www.hubspot.com/careers"}
+- {name: Squarespace, tier: 3, careers_url: "https://www.squarespace.com/about/careers"}
+- {name: Zillow, tier: 3, careers_url: "https://www.zillow.com/careers/"}
+- {name: NVIDIA, tier: 2, ats_type: workday, board_token: nvidia/wd5/NVIDIAExternalCareerSite}
+- {name: Salesforce, tier: 3, ats_type: workday, board_token: salesforce/wd12/External_Career_Site}
+- {name: Adobe, tier: 3, ats_type: workday, board_token: adobe/wd5/external_experienced}
+- {name: Visa, tier: 3, ats_type: smartrecruiters, board_token: Visa}
+- {name: ServiceNow, tier: 3, ats_type: smartrecruiters, board_token: ServiceNow}

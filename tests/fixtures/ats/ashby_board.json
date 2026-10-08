@@ -1,0 +1,32 @@
+{
+  "apiVersion": "1",
+  "jobs": [
+    {
+      "id": "4e5f6a7b-1111-4111-8111-000000000001",
+      "title": "Full Stack Engineer",
+      "department": "Engineering",
+      "team": "Product",
+      "employmentType": "FullTime",
+      "location": "Remote (Canada)",
+      "secondaryLocations": [{"location": "Toronto", "address": {"postalAddress": {"addressLocality": "Toronto", "addressRegion": "Ontario", "addressCountry": "Canada"}}}],
+      "publishedAt": "2026-10-07T18:22:41.123+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {"postalAddress": {"addressCountry": "Canada"}},
+      "jobUrl": "https://jobs.ashbyhq.com/exampleashby/4e5f6a7b-1111-4111-8111-000000000001",
+      "applyUrl": "https://jobs.ashbyhq.com/exampleashby/4e5f6a7b-1111-4111-8111-000000000001/application",
+      "descriptionHtml": "<p>React, TypeScript, Node.js and PostgreSQL.</p>",
+      "descriptionPlain": "React, TypeScript, Node.js and PostgreSQL. 2-4 years of experience building production web apps.",
+      "compensation": {"compensationTierSummary": "CA$120K – CA$150K • Offers Equity", "scrapeableCompensationSalarySummary": "CA$120K - CA$150K"}
+    },
+    {
+      "id": "4e5f6a7b-1111-4111-8111-000000000002",
+      "title": "Software Engineer (unlisted)",
+      "isListed": false,
+      "location": "New York",
+      "jobUrl": "https://jobs.ashbyhq.com/exampleashby/x",
+      "descriptionPlain": ""
+    }
+  ]
+}

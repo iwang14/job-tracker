@@ -1,0 +1,28 @@
+[
+  {
+    "id": "a1b2c3d4-0000-4000-8000-000000000001",
+    "text": "Software Engineer I",
+    "categories": {"commitment": "Full-time", "department": "Engineering", "location": "Vancouver, BC", "team": "Core", "allLocations": ["Vancouver, BC", "Remote - Canada"]},
+    "country": "CA",
+    "workplaceType": "hybrid",
+    "createdAt": 1791400000000,
+    "descriptionPlain": "Join our TypeScript and Python backend team.",
+    "description": "<div>Join our TypeScript and Python backend team.</div>",
+    "lists": [{"text": "Requirements", "content": "<li>1+ years of experience building web services</li><li>Comfort with SQL</li>"}],
+    "additionalPlain": "We are unable to sponsor visas for this role.",
+    "hostedUrl": "https://jobs.lever.co/examplelever/a1b2c3d4-0000-4000-8000-000000000001",
+    "applyUrl": "https://jobs.lever.co/examplelever/a1b2c3d4-0000-4000-8000-000000000001/apply",
+    "salaryRange": {"currency": "CAD", "interval": "per-year-salary", "min": 95000, "max": 120000}
+  },
+  {
+    "id": "a1b2c3d4-0000-4000-8000-000000000002",
+    "text": "Engineering Manager",
+    "categories": {"location": "San Francisco, CA", "allLocations": ["San Francisco, CA"]},
+    "country": "US",
+    "workplaceType": "onsite",
+    "createdAt": 1791300000000,
+    "descriptionPlain": "Manage a team.",
+    "lists": [],
+    "hostedUrl": "https://jobs.lever.co/examplelever/a1b2c3d4-0000-4000-8000-000000000002"
+  }
+]

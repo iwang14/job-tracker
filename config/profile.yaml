@@ -1,0 +1,50 @@
+# Your profile: drives keyword scoring, the LLM fit prompt, and the helpers. Edit freely.
+headline: "Software developer with ~2 years of professional experience in C#/.NET, TypeScript and Python"
+years_experience: 2
+target_roles: [Backend Software Engineer, Full-Stack Software Engineer, SDE I/II]
+notes: "Open to anywhere in Canada or the US. Prefers Vancouver, then remote-Canada, Ottawa/Toronto."
+# Used by the referral helper. Only facts you're happy to state.
+referral_pitch: "a backend/full-stack developer with ~2 years shipping C#/.NET and TypeScript services"
+
+# Weight defaults: core 3, secondary 1.5, nice 0.75. Use {name, aliases, weight} for control.
+skills:
+  core:
+    - {name: "C#", aliases: [csharp, "c sharp"]}
+    - {name: ".NET", aliases: [dotnet, "asp.net", ".net core"]}
+    - TypeScript
+    - Python
+  secondary:
+    - JavaScript
+    - {name: Node.js, aliases: [nodejs, node]}
+    - React
+    - SQL
+    - PostgreSQL
+    - {name: REST, aliases: [RESTful, "REST API", "REST APIs"]}
+    - {name: AWS, aliases: [Amazon Web Services]}
+    - Azure
+    - Docker
+    - {name: distributed systems, aliases: [microservices]}
+    - backend
+    - full-stack
+  nice:
+    - Kubernetes
+    - GraphQL
+    - Redis
+    - {name: CI/CD, aliases: [continuous integration]}
+    - Git
+    - Linux
+    - Django
+    - FastAPI
+    - Next.js
+    - Terraform
+    - Kafka
+
+skill_saturation: 9.0           # matched weight at which skill fit maxes out
+
+# Lower the score when these appear (e.g. stacks you don't want).
+avoid_keywords: []
+
+# Extra JD terms the resume helper checks for (beyond your skills).
+jd_vocabulary: [Java, Go, Golang, Rust, Ruby, Rails, Kotlin, Scala, C++, Spark, Airflow, gRPC, MySQL, MongoDB,
+                DynamoDB, Elasticsearch, GCP, Lambda, observability, Datadog, Grafana, testing, unit tests,
+                agile, system design, OAuth, security, Angular, Vue]

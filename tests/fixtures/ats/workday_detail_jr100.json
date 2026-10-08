@@ -1,0 +1,4 @@
+{"jobPostingInfo": {"id": "abc", "title": "Software Engineer", "jobDescription": "<p>C# and Azure.</p><p>2+ years of experience in software development.</p>",
+ "location": "Toronto, ON", "additionalLocations": ["Ottawa, ON"], "country": {"descriptor": "Canada"},
+ "startDate": "2026-10-08", "externalUrl": "https://example.wd5.myworkdayjobs.com/External/job/Toronto-ON/Software-Engineer_JR100",
+ "jobReqId": "JR100", "remoteType": "Hybrid"}}

@@ -1,0 +1,13 @@
+{
+  "offset": 0, "limit": 100, "totalFound": 2,
+  "content": [
+    {"id": "744000012345678", "name": "Software Engineer II - Backend", "uuid": "u1", "refNumber": "REF1",
+     "company": {"identifier": "ExampleSR", "name": "Example SR"}, "releasedDate": "2026-10-07T12:00:00.000Z",
+     "location": {"city": "Austin", "region": "TX", "country": "us", "remote": false, "fullLocation": "Austin, TX, United States"},
+     "experienceLevel": {"id": "mid_senior_level", "label": "Mid-Senior Level"},
+     "ref": "https://api.smartrecruiters.com/v1/companies/ExampleSR/postings/744000012345678"},
+    {"id": "744000012345679", "name": "Account Executive", "uuid": "u2",
+     "releasedDate": "2026-10-06T12:00:00.000Z",
+     "location": {"city": "Toronto", "region": "ON", "country": "ca", "remote": false, "fullLocation": "Toronto, ON, Canada"}}
+  ]
+}

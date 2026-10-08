@@ -1,0 +1,46 @@
+{
+  "jobs": [
+    {
+      "id": 7001001,
+      "internal_job_id": 5001,
+      "title": "Software Engineer II, Backend",
+      "updated_at": "2026-10-07T14:03:11-04:00",
+      "first_published": "2026-10-07T13:00:00-04:00",
+      "requisition_id": "R-1001",
+      "absolute_url": "https://boards.greenhouse.io/examplegh/jobs/7001001",
+      "location": {"name": "Toronto, ON, Canada"},
+      "metadata": [{"id": 1, "name": "Workplace Type", "value": "Hybrid", "value_type": "single_select"}],
+      "content": "&lt;p&gt;We build payments APIs in &lt;strong&gt;C#&lt;/strong&gt; and TypeScript.&lt;/p&gt;&lt;h3&gt;What you need&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;2+ years of professional software development experience&lt;/li&gt;&lt;li&gt;Experience with .NET, PostgreSQL and AWS&lt;/li&gt;&lt;/ul&gt;&lt;h3&gt;Nice to have&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;5+ years of experience with distributed systems&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;The salary range for this role is CA$110,000 - CA$140,000.&lt;/p&gt;",
+      "departments": [{"id": 1, "name": "Engineering"}],
+      "offices": [{"id": 1, "name": "Toronto", "location": "Toronto, ON, Canada"}]
+    },
+    {
+      "id": 7001002,
+      "title": "Senior Software Engineer, Platform",
+      "updated_at": "2026-10-06T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/examplegh/jobs/7001002",
+      "location": {"name": "Vancouver, BC"},
+      "metadata": [],
+      "content": "&lt;p&gt;Lead platform work.&lt;/p&gt;"
+    },
+    {
+      "id": 7001003,
+      "title": "Software Engineer, Full Stack",
+      "updated_at": "2026-10-06T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/examplegh/jobs/7001003",
+      "location": {"name": "Remote - US"},
+      "metadata": null,
+      "content": "&lt;p&gt;React and Node.js. You must be located in the United States.&lt;/p&gt;"
+    },
+    {
+      "id": 7001004,
+      "title": "Software Developer",
+      "updated_at": "2026-10-05T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/examplegh/jobs/7001004",
+      "location": {"name": "Vancouver, British Columbia, Canada"},
+      "metadata": [],
+      "content": "&lt;p&gt;Python services.&lt;/p&gt;&lt;h3&gt;Requirements&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;Minimum of five (5) years of software engineering experience&lt;/li&gt;&lt;/ul&gt;"
+    }
+  ],
+  "meta": {"total": 4}
+}

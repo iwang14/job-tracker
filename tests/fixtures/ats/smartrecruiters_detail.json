@@ -1,0 +1,10 @@
+{
+  "id": "744000012345678", "name": "Software Engineer II - Backend",
+  "postingUrl": "https://jobs.smartrecruiters.com/ExampleSR/744000012345678-software-engineer-ii-backend",
+  "jobAd": {"sections": {
+    "companyDescription": {"title": "Company Description", "text": "<p>We move money.</p>"},
+    "jobDescription": {"title": "Job Description", "text": "<p>Build Python and Go services on AWS.</p>"},
+    "qualifications": {"title": "Qualifications", "text": "<ul><li>3+ years of software development experience</li><li>Must be authorized to work in the United States; we do not sponsor visas</li></ul>"},
+    "additionalInformation": {"title": "Additional Information", "text": "<p>$120,000 - $150,000 USD</p>"}
+  }}
+}

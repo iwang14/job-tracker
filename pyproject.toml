@@ -1,0 +1,9 @@
+[project]
+name = "jobpipe"
+version = "0.1.0"
+description = "Personal job-search pipeline: public ATS boards -> filters -> scoring -> Google Sheet + alerts"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,27 @@
+# One company per line. Fields: name, tier (1/2/3), ats_type, board_token, careers_url, enabled.
+# ats_type: greenhouse | lever | ashby | smartrecruiters | workday | amazon | microsoft | eightfold
+#           (google | meta | apple are intentionally not scraped - see jobpipe/fetchers/bigtech.py)
+# Workday token: "tenant/wdN/site". Eightfold/Microsoft token: "host|domain".
+# Add one:   python -m jobpipe detect https://company.com/careers --name "Company" --tier 2
+# UNVERIFIED tokens below were written without network access to these APIs: run the
+# "verify" workflow once (Actions -> jobpipe -> Run workflow -> verify) and fix any ERR rows.
+companies:
+  # --- Tier 1 ---
+  - {name: Shopify, tier: 1, ats_type: greenhouse, board_token: shopify, careers_url: "https://www.shopify.com/careers"}   # UNVERIFIED
+  - {name: Atlassian, tier: 1, ats_type: lever, board_token: atlassian, careers_url: "https://www.atlassian.com/company/careers/all-jobs"}   # UNVERIFIED
+  - {name: Amazon, tier: 1, ats_type: amazon, careers_url: "https://www.amazon.jobs", enabled: false, query: "software development engineer", countries: [USA, CAN]}   # off until you review amazon.jobs terms
+  # --- Tier 2 ---
+  - {name: Stripe, tier: 2, ats_type: greenhouse, board_token: stripe}
+  - {name: Datadog, tier: 2, ats_type: greenhouse, board_token: datadog}
+  - {name: Cloudflare, tier: 2, ats_type: greenhouse, board_token: cloudflare}
+  - {name: Coinbase, tier: 2, ats_type: greenhouse, board_token: coinbase}
+  - {name: Databricks, tier: 2, ats_type: greenhouse, board_token: databricks}
+  - {name: Affirm, tier: 2, ats_type: greenhouse, board_token: affirm}
+  - {name: Notion, tier: 2, ats_type: ashby, board_token: notion}
+  - {name: Ramp, tier: 2, ats_type: ashby, board_token: ramp}
+  - {name: Cohere, tier: 2, ats_type: ashby, board_token: cohere}
+  - {name: Wealthsimple, tier: 2, ats_type: lever, board_token: wealthsimple}
+  - {name: Plaid, tier: 2, ats_type: lever, board_token: plaid}
+  - {name: NVIDIA, tier: 2, ats_type: workday, board_token: nvidia/wd5/NVIDIAExternalCareerSite, search_text: software engineer}
+  - {name: Visa, tier: 3, ats_type: smartrecruiters, board_token: Visa}
+  - {name: Microsoft, tier: 2, ats_type: microsoft, board_token: "apply.careers.microsoft.com|microsoft.com", enabled: false, query: software engineer}   # off: undocumented endpoint
