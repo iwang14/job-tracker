@@ -32,13 +32,15 @@ URL_PATTERNS: list[tuple[str, re.Pattern]] = [
     ("smartrecruiters", re.compile(r"(?:jobs|careers)\.smartrecruiters\.com/([A-Za-z0-9_-]+)", re.I)),
     ("smartrecruiters", re.compile(r"api\.smartrecruiters\.com/v1/companies/([A-Za-z0-9_-]+)", re.I)),
     ("workday", re.compile(r"([a-z0-9-]+)\.(wd\d+)\.myworkdayjobs\.com/(?:wday/cxs/[a-z0-9-]+/)?(?:[a-z]{2}-[A-Z]{2}/)?([A-Za-z0-9_-]+)", re.I)),
+    ("icims", re.compile(r"([a-z0-9-]+)\.icims\.com", re.I)),
     ("amazon", re.compile(r"amazon\.jobs", re.I)),
     ("microsoft", re.compile(r"(?:apply\.)?careers\.microsoft\.com|jobs\.careers\.microsoft\.com", re.I)),
     ("google", re.compile(r"google\.com/about/careers|careers\.google\.com", re.I)),
     ("meta", re.compile(r"metacareers\.com", re.I)),
     ("apple", re.compile(r"jobs\.apple\.com", re.I)),
+    ("atlassian", re.compile(r"atlassian\.com/company/careers", re.I)),
 ]
-BIG_TOKENS = {"amazon": None, "microsoft": "apply.careers.microsoft.com|microsoft.com", "google": None,
+BIG_TOKENS = {"atlassian": None, "amazon": None, "microsoft": "apply.careers.microsoft.com|microsoft.com", "google": None,
               "meta": None, "apple": None}
 IGNORED_FIRST_SEGMENTS = {"embed", "v1", "jobs", "job", "en-us", "api"}
 

@@ -29,6 +29,7 @@ class RunStats:
     duplicates: int = 0
     llm_calls: int = 0
     alerts: int = 0
+    enriched: int = 0
     failed_fetchers: list[str] = field(default_factory=list)
     timings: dict[str, float] = field(default_factory=dict)
 
@@ -46,8 +47,7 @@ def fetch_all(companies: list[Company], db: DB, http: Http, settings: Settings,
     title_check = lambda t: filters.title_ok(t, fcfg).passes
     jobs = []
     for c in companies:
-        source = "eightfold" if c.ats_type == "microsoft" else c.ats_type
-        ctx = FetchContext(known_ids=db.known_external_ids(c.key, source), title_ok=title_check,
+        ctx = FetchContext(known_ids=db.known_external_ids(c.key, c.source), title_ok=title_check,
                            max_pages=int(settings.section("fetch").get("max_pages", 50)))
         jobs.append((c, http.scoped(), ctx))
     out = []
@@ -86,7 +86,9 @@ def ingest(db: DB, company: Company | None, result: FetchResult, settings: Setti
     for p in result.postings:
         stats.fetched += 1
         existing = db.get(p.id)
-        list_only = not p.description  # e.g. SmartRecruiters/Workday skip detail calls for known postings
+        # e.g. SmartRecruiters/Workday skip detail calls for known postings; community lists never carry the
+        # real description (it may have been filled in by discovery.enrich), so they only compare title/location
+        list_only = not p.description or p.source.startswith("community:")
         if existing is not None and list_only:
             p.description = existing["description"]
         normalize.enrich(p)
@@ -132,7 +134,7 @@ def ingest(db: DB, company: Company | None, result: FetchResult, settings: Setti
             db.touch([p.id], now)
 
     if result.complete and company is not None:
-        src = source or ("eightfold" if company.ats_type == "microsoft" else company.ats_type)
+        src = source or company.source
         seen = boards.get((company.key, src), set())
         close_after = int(settings.section("fetch").get("close_after_missed_runs", 2))
         stats.closed += len(db.mark_missing(company.key, src, seen, now, close_after))
@@ -152,7 +154,7 @@ def score_pending(db: DB, settings: Settings, stats: RunStats, now: datetime) ->
             cached = db.llm_get(r["id"], r["content_hash"])
             if cached:
                 fit, summary = cached["fit"], cached["summary"]
-            elif stats.llm_calls < budget and r["description"]:
+            elif stats.llm_calls < budget and len(r["description"] or "") >= 120:
                 got = llm.semantic_fit(r["title"], r["company"], r["description"], profile, sc.get("llm_model"))
                 stats.llm_calls += 1
                 if got:
@@ -173,6 +175,26 @@ def score_pending(db: DB, settings: Settings, stats: RunStats, now: datetime) ->
     db.commit()
 
 
+def resolve_auto(db: DB, c: Company) -> Company:
+    """ats_type auto: swap in the board resolved on an earlier run, if any."""
+    if c.ats_type != "auto":
+        return c
+    from .fetchers.auto import parse_candidate
+    c.options["_health_key"] = c.fetcher_key
+    saved = db.kv_get(f"resolved:{c.key}")
+    if not saved:
+        return c
+    eff = parse_candidate(json.loads(saved), c)
+    eff.options["_health_key"] = c.fetcher_key
+    return eff
+
+
+def health_key(c) -> str:
+    if isinstance(c, Company):
+        return c.options.get("_health_key") or c.fetcher_key
+    return f"community:{c.name}"
+
+
 def run(db: DB, companies: list[Company], settings: Settings, notifier: Notifier, *, tiers: set[int] | None = None,
         sheet=None, http: Http | None = None, community: bool = True, now_fn=None) -> RunStats:
     now_fn = now_fn or (lambda: datetime.now(timezone.utc).replace(microsecond=0))
@@ -180,7 +202,7 @@ def run(db: DB, companies: list[Company], settings: Settings, notifier: Notifier
     run_id = db.start_run("tiers=" + ",".join(map(str, sorted(tiers))) if tiers else "all")
     notifier = notifier if isinstance(notifier, SafeNotifier) else SafeNotifier(notifier)
     http = http or Http(cache=db, min_interval=float(settings.section("fetch").get("per_host_interval", 0.5)))
-    active = [c for c in companies if c.enabled and (not tiers or c.tier in tiers)]
+    active = [resolve_auto(db, c) for c in companies if c.enabled and (not tiers or c.tier in tiers)]
 
     t0 = time.monotonic()
     extra = []
@@ -188,24 +210,33 @@ def run(db: DB, companies: list[Company], settings: Settings, notifier: Notifier
         from .discovery import community as comm
         for src in settings.get("community_sources", []) or []:
             extra.append((comm.CommunitySource(src), (lambda h, s=src: comm.fetch_source(s, h, companies))))
+        from .discovery import email_alerts
+        ecfg = settings.section("email_alerts")
+        if email_alerts.configured(ecfg):
+            extra.append((email_alerts.EmailSource(ecfg), (lambda h: email_alerts.fetch(ecfg, companies))))
     results = fetch_all(active, db, http, settings, extra_jobs=extra)
     stats.timings["fetch"] = round(time.monotonic() - t0, 1)
 
     now = now_fn().isoformat()
     for company, scoped_http, result, err in results:
-        if isinstance(company, Company):
-            key = company.fetcher_key
-        else:
-            key = f"community:{company.name}"
+        key = health_key(company)
         if err is not None:
             if isinstance(err, FetcherDisabled):
                 continue
-            db.record_fetch(key, False, f"{type(err).__name__}: {err}", now)
+            row = db.record_fetch(key, False, f"{type(err).__name__}: {err}", now)
             stats.failed_fetchers.append(key)
+            if key.startswith("auto:") and row["consecutive_failures"] >= 3:
+                db.conn.execute("DELETE FROM kv WHERE key=?", (f"resolved:{company.key}",))  # re-probe
             continue
+        if result.resolved is not None:
+            r = result.resolved
+            db.kv_set(f"resolved:{r.key}", json.dumps({"ats_type": r.ats_type, "board_token": r.board_token}))
+            log.info("%s resolved to %s:%s", r.name, r.ats_type, r.board_token)
+            r.options["_health_key"] = key
+            company = r
         if result.unchanged:
             if isinstance(company, Company):
-                db.touch_board(company.key, "eightfold" if company.ats_type == "microsoft" else company.ats_type, now)
+                db.touch_board(company.key, company.source, now)
             else:
                 db.touch_source(company.source, now)
         elif isinstance(company, Company):
@@ -214,12 +245,15 @@ def run(db: DB, companies: list[Company], settings: Settings, notifier: Notifier
             ingest(db, company, result, settings, now, stats,
                    bootstrap_all=not (prior and prior[0]["total_ok_runs"] > 0))
         else:
-            from .discovery import community as comm
-            comm.ingest_community(db, company, result, settings, now, stats)
+            company.ingest(db, result, settings, now, stats)  # community list / email source
         if scoped_http is not None:
             scoped_http.commit_validators()
         db.record_fetch(key, True, None, now)
     db.commit()
+
+    if community and not tiers:
+        from .discovery.enrich import enrich_community
+        stats.enriched = enrich_community(db, http, settings)
 
     t1 = time.monotonic()
     score_pending(db, settings, stats, now_fn())

@@ -13,6 +13,7 @@ import hashlib
 import html
 import re
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from .. import filters, normalize
 from ..db import DB
@@ -47,6 +48,9 @@ class CommunitySource:
     @property
     def url(self) -> str:
         return self.raw["url"]
+
+    def ingest(self, db, result, settings, now, stats) -> None:
+        ingest_community(db, self, result, settings, now, stats)
 
 
 @dataclass
@@ -156,15 +160,51 @@ def _match_company(name: str, by_key: dict[str, Company]) -> Company | None:
     return by_key.get(k) or by_key.get(k.replace("-", ""))
 
 
-def fetch_source(src: dict, http: Http, companies: list[Company]) -> FetchResult:
-    cs = CommunitySource(src)
-    r = http.get(cs.url, expect_json=False, conditional=True)
-    if r.not_modified:
-        return FetchResult(unchanged=True)
+def _company_index(companies: list[Company]) -> dict[str, Company]:
     by_key = {}
     for c in companies:
         by_key[c.key] = c
         by_key[c.key.replace("-", "")] = c
+    return by_key
+
+
+def parse_simplify_json(data: list, src: dict, companies: list[Company], now: datetime | None = None) -> list[Posting]:
+    """SimplifyJobs' machine-readable listings (the data their README tables are generated from).
+    Gives exact posted dates, a locations list, an active flag and a sponsorship field."""
+    cs = CommunitySource(src)
+    by_key = _company_index(companies)
+    now = now or datetime.now(timezone.utc)
+    max_age = now.timestamp() - int(src.get("max_age_days", 45)) * 86400
+    out = []
+    for x in data:
+        if not x.get("active") or x.get("is_visible") is False:
+            continue
+        if (x.get("date_updated") or x.get("date_posted") or 0) < max_age:
+            continue
+        name = (x.get("company_name") or "").strip()
+        c = _match_company(name, by_key)
+        sponsorship = x.get("sponsorship") or ""
+        out.append(Posting(
+            company=c.name if c else name, company_key=c.key if c else slugify(name),
+            source=cs.source, external_id=str(x.get("id") or hashlib.sha1(x["url"].encode()).hexdigest()[:16]),
+            title=(x.get("title") or "").strip(), url=_strip_tracking(x.get("url") or ""),
+            location_raw="; ".join(x.get("locations") or []),
+            posted_at=normalize.to_iso(x.get("date_posted")),
+            # kept short on purpose: score_pending only calls the LLM on real descriptions
+            description=f"Sponsorship: {sponsorship}." if sponsorship and sponsorship != "Other" else "",
+            tier=c.tier if c else int(src.get("tier", 3)),
+        ))
+    return out
+
+
+def fetch_source(src: dict, http: Http, companies: list[Company]) -> FetchResult:
+    cs = CommunitySource(src)
+    r = http.get(cs.url, expect_json=src.get("type") == "simplify_json", conditional=True)
+    if r.not_modified:
+        return FetchResult(unchanged=True)
+    if src.get("type") == "simplify_json":
+        return FetchResult(parse_simplify_json(r.data or [], src, companies))
+    by_key = _company_index(companies)
     postings = []
     for row in parse_tables(r.text):
         c = _match_company(row.company, by_key)

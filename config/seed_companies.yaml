@@ -3,7 +3,7 @@
 # Greenhouse/Lever/Ashby with slug guesses. Output goes to config/companies.candidates.yaml for
 # your review; nothing is added to companies.yaml until you run `python -m jobpipe approve`.
 # --- Canada-headquartered / big Canadian engineering presence ---
-- {name: Shopify, tier: 1, careers_url: "https://www.shopify.com/careers"}
+- {name: Shopify, tier: 1, ats_type: auto, careers_url: "https://www.shopify.com/careers"}   # see companies.yaml
 - {name: Wealthsimple, tier: 2, ats_type: lever, board_token: wealthsimple}
 - {name: Clio, tier: 2, careers_url: "https://www.clio.com/about/careers/"}
 - {name: 1Password, tier: 2, ats_type: ashby, board_token: 1password}
@@ -36,7 +36,7 @@
 - {name: Fullscript, tier: 3, careers_url: "https://fullscript.com/careers"}
 - {name: League, tier: 3, careers_url: "https://league.com/careers/"}
 # --- US / global tech with Canada or broad US hiring ---
-- {name: Atlassian, tier: 1, careers_url: "https://www.atlassian.com/company/careers/all-jobs"}
+- {name: Atlassian, tier: 1, ats_type: atlassian}   # iCIMS-backed; custom fetcher
 - {name: Amazon, tier: 1, ats_type: amazon}
 - {name: Microsoft, tier: 2, ats_type: microsoft, board_token: "apply.careers.microsoft.com|microsoft.com"}
 - {name: Stripe, tier: 2, ats_type: greenhouse, board_token: stripe}

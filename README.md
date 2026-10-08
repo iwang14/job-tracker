@@ -16,7 +16,7 @@ GitHub Actions cron (private repo)
  ├─ Google Sheet: Postings ⇄ Applications ⇄ Prep ⇄ Stats
  └─ save state.db  ──► `state` branch
 ```
-\* off by default; see [Big-company sites](#big-company-sites-and-terms-of-service).
+\* opt-in per company; see [Big-company sites](#big-company-sites-and-terms-of-service). Also: SimplifyJobs listings JSON, job-alert emails (IMAP), sitemaps.
 
 ## Repo layout
 
@@ -114,9 +114,10 @@ Settings → Secrets and variables → Actions:
 | `ANTHROPIC_API_KEY` | secret | optional; enables Claude scoring and the helpers |
 | `NOTIFIER` | variable | optional: `discord` / `telegram` / `console` (auto-detected otherwise) |
 | `JOBPIPE_CONTACT` | variable | optional: put a URL or email in the User-Agent so boards can reach you |
+| `EMAIL_IMAP_USER`, `EMAIL_IMAP_PASSWORD` | secrets | optional: Gmail address + app password for [job-alert emails](#official-job-alert-emails-amazon-microsoft) |
 
 ### 5. First runs
-1. Actions → **jobpipe** → Run workflow → mode **verify** (tick *record* to save raw responses as fixtures). Each enabled board is hit once and you get `OK` / `ERR` rows. **Fix any ERR rows in `companies.yaml`.** The Shopify and Atlassian tokens in particular are unverified guesses, because the build sandbox couldn't reach the job-board APIs.
+1. Actions → **jobpipe** → Run workflow → mode **verify** (tick *record* to save raw responses as fixtures). Each enabled board is hit once and you get `OK` / `ERR` rows. **Fix any ERR rows in `companies.yaml`.** The build sandbox couldn't reach the job-board APIs, so every token is unverified. Shopify uses `auto`, so it fixes itself if any public board answers.
 2. Run mode **run** once. The first fetch of each board is treated as a backfill: it fills the sheet and the digest without a burst of instant alerts.
 3. From then on the cron takes over.
 
@@ -143,17 +144,37 @@ Each company is one line in `config/companies.yaml`:
 
 ## Big-company sites and terms of service
 
-| company | fetcher | default | why |
-|---|---|---|---|
-| Amazon | `amazon` (amazon.jobs `search.json`) | **off** | undocumented endpoint behind the public search page; review amazon.jobs' terms, run `verify --company Amazon`, then set `enabled: true` |
-| Microsoft | `microsoft` (Eightfold `api/apply/v2/jobs`) | **off** | same; endpoint shape unverified |
-| Google, Meta, Apple | stubs that raise `FetcherDisabled` | n/a | no public API; their careers sites are internal APIs or HTML, and their terms restrict automated collection |
+Public ATS APIs (Greenhouse, Lever, Ashby, SmartRecruiters, Workday CXS) are published for this use
+and need nothing extra. Company-specific endpoints are undocumented, so they go through a two-part
+gate in `jobpipe/robots.py`:
+1. **`tos_ok: true`** on the company in `companies.yaml`, which you set after reading that site's terms. Without it the fetcher is skipped silently, like a disabled company.
+2. **robots.txt**, checked live on every run for jobpipe's User-Agent. If the site disallows the URL, or its robots.txt can't be read, nothing is fetched and the failure alert tells you after 3 runs.
 
-All five are still covered ToS-cleanly through the **community lists** (SimplifyJobs and SpeedyApply
-carry their new-grad/early-career postings with direct links). Amazon matches your Tier-1 entry, so
-those postings get Tier-1 instant alerts even while the Amazon fetcher is off. For broader coverage, also
-set up each company's own job-alert emails. Each fetcher runs in isolation: one breaking never breaks the
-run, and three failures in a row trigger an alert.
+| company | ToS-clean coverage (always on) | opt-in fetcher (`tos_ok: true`) |
+|---|---|---|
+| **Amazon** (Tier 1) | SimplifyJobs listings, with exact posted dates · **Amazon's own job-alert emails** (below) | `amazon`: amazon.jobs `search.json` |
+| **Microsoft** | SimplifyJobs and SpeedyApply · **Microsoft's job-alert emails** | `microsoft`: Eightfold `api/apply/v2/jobs`, falling back to `api/pcsx/search` |
+| **Atlassian** (Tier 1) | SimplifyJobs (Atlassian's iCIMS links) | `atlassian`: the `/endpoint/careers/listings` JSON behind atlassian.com/careers. Applications run on iCIMS (`careers-americas.icims.com`), which has no public API. |
+| **Shopify** (Tier 1) | `ats_type: auto` probes the public Ashby, Lever, Greenhouse and SmartRecruiters APIs and **locks in whichever answers**. It re-probes if that board fails 3 runs in a row. | `sitemap`: Shopify hosts its own site (`shopify.com/careers/<slug>_<uuid>`), so this reads job URLs from its published sitemap. |
+| Google, Meta, Apple | SimplifyJobs and SpeedyApply | none: no public API, and their terms restrict automated collection |
+
+Links from all of these are reduced to the job ID before deduping (`amazon.jobs/jobs/<id>`,
+`careers.microsoft.com/job/<id>`, iCIMS and Greenhouse IDs). That way the same job arriving from the
+fetcher, a community list and an alert email shows up once.
+
+### Official job-alert emails (Amazon, Microsoft)
+Reading alerts that a company sends to your own inbox doesn't involve their site at all, so this is
+the cleanest route.
+1. On amazon.jobs, search *software development engineer* (USA + Canada) and **create a job alert**. Do the same on careers.microsoft.com.
+2. In Gmail, add a filter: *from:(amazon.jobs OR microsoft.com) subject:job* → apply label **`jobpipe`**.
+3. Create a Google **App Password**: Google Account → Security → 2-Step Verification → App passwords. IMAP is on by default in current Gmail.
+4. Add secrets `EMAIL_IMAP_USER` (your address) and `EMAIL_IMAP_PASSWORD` (the app password), then set `email_alerts.enabled: true` in `settings.yaml`.
+
+Each full run reads the last 3 days of that label over IMAP. It is read-only: messages aren't marked
+read, moved or deleted. Job links are extracted with the per-company regexes in
+`settings.yaml → email_alerts.rules`, and you can add rules for any other company's alert emails. Alerts
+are as fresh as the company sends them; Amazon's are typically daily. The opt-in fetcher or SimplifyJobs
+will usually see a posting sooner.
 
 ## Filters and scoring
 
@@ -172,11 +193,24 @@ run, and three failures in a row trigger an alert.
 | tab | who owns what |
 |---|---|
 | **Postings** | Filtered open jobs, newest first. The script owns every column except **Status** (dropdown: new / applying / applied / skipped) and **My notes**. Existing rows are updated cell by cell for script columns only, and columns are found by header, so you can add or reorder your own. Closed rows are struck through; untouched closed rows are pruned after 14 days. |
-| **Applications** | When you set a posting to **applied**, the next run copies it here with Date applied = today, Stage = applied, Channel = company site, and a follow-up next action in 10 days. **After that the row is yours.** The script only fills *Last update* and *First response* when it sees the Stage change. You can add manual rows (leave Posting ID blank). Overdue next actions turn **red**. |
+| **Applications** | When you set a posting to **applied**, it's copied here instantly if you installed the optional Apps Script (below), otherwise by the next hourly run. The copy has Date applied = today, Stage = applied, Channel = company site, and a follow-up next action in 10 days. **After that the row is yours.** The script only fills *Last update* and *First response* when it sees the Stage change. You can add manual rows (leave Posting ID blank). Overdue next actions turn **red**. |
 | **Prep** | Moving to **OA** or **tech screen** appends a checklist row: research recent interview reports for that company and role, map STAR stories to the JD, and so on. |
 | **Stats** | Rewritten each run: callback rate by channel, tier, country and resume version; median days to first response; stage counts; applications per week. A *callback* means the application reached OA, recruiter screen, tech screen, onsite or offer, and it still counts if the application was later rejected. |
 
-Sync runs hourly, so "applied → Applications" happens within the hour, not instantly.
+### Instant "applied → Applications" (optional)
+Paste `apps_script/Code.gs` into the sheet (Extensions → Apps Script → Save). It's an `onEdit` simple
+trigger, so it needs no authorization and copies the row the moment you pick **applied**. The hourly
+Python sync does the same copy and checks *Posting ID* first, so the two never duplicate, and if the
+script ever breaks nothing is lost.
+
+### Less noise
+`sheet.min_score` (default 25) and `alerts.digest_min_score` (default 25) keep low-scoring postings out of the
+Postings tab and the digest. These are mostly community-list rows with no description. Tier 1 is always shown,
+and rows already in the sheet are never removed by this. The weekly summary reports how many were hidden.
+
+Community postings whose apply link is a public Greenhouse, Lever or Ashby job also get their **full
+description fetched** (`community_enrich`, up to 15 per run). They then score properly, and the YOE
+filter can drop the ones that need 5+ years.
 
 ## Alerts
 

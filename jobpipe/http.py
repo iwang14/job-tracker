@@ -59,7 +59,7 @@ class HostLimiter:
 
 class Http:
     def __init__(self, cache=None, min_interval: float = 0.5, timeout: float = 20.0,
-                 retries: int = 3, user_agent: str | None = None):
+                 retries: int = 2, user_agent: str | None = None):
         contact = os.environ.get("JOBPIPE_CONTACT", "github.com")
         self.user_agent = user_agent or os.environ.get("JOBPIPE_USER_AGENT") or DEFAULT_UA.format(contact=contact)
         self.cache = cache            # object with get_validators/set_validators (db.DB), optional
@@ -122,7 +122,10 @@ class Http:
                 # (see commit_validators) so a parse failure never leaves us stuck on a 304.
                 self.pending_validators.append((cache_key, resp.etag, resp.last_modified))
             return resp
-        raise last_exc or HttpError(0, url, "request failed")
+        if isinstance(last_exc, HttpError):
+            raise last_exc
+        # connection/proxy/timeout errors surface as HttpError(0) so callers need one except clause
+        raise HttpError(0, url, f"{type(last_exc).__name__}: {last_exc}") from last_exc
 
     def get(self, url: str, **kw) -> Response:
         return self.request("GET", url, **kw)

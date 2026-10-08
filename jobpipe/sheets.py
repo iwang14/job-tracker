@@ -230,10 +230,14 @@ def sync_postings(db: DB, ws, cfg: dict, now: str, res: SyncResult) -> list[list
                 db.update_posting(pid, user_status=status)
 
     window = (datetime.fromisoformat(now) - timedelta(days=int(cfg.get("postings_window_days", 21)))).isoformat()
+    # min_score hides low-signal rows (mostly community-list postings with no description);
+    # Tier-1 companies are always shown, and rows already in the sheet are never dropped by it.
+    min_score = int(cfg.get("min_score", 0))
     rows = db.query(
         "SELECT * FROM postings WHERE passes_filters=1 AND duplicate_of IS NULL "
-        "AND ((status='open' AND first_seen_at>=?) OR id IN (%s)) ORDER BY first_seen_at DESC, score DESC"
-        % ",".join("?" * len(existing)), (window, *existing.keys()))
+        "AND ((status='open' AND first_seen_at>=? AND (COALESCE(score, 0)>=? OR tier=1)) OR id IN (%s)) "
+        "ORDER BY first_seen_at DESC, score DESC"
+        % ",".join("?" * len(existing)), (window, min_score, *existing.keys()))
 
     updates, new_rows = [], []
     for r in rows:

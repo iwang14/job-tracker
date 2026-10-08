@@ -1,6 +1,7 @@
 import pytest
 
 from jobpipe.fetchers import REGISTRY, FetchContext, FetcherDisabled
+from jobpipe.http import HttpError
 from jobpipe.models import Company
 from jobpipe.normalize import enrich
 
@@ -105,10 +106,13 @@ def test_workday_bad_token():
         REGISTRY["workday"](Company("X", 3, "workday", "nope"), FakeHttp(), FetchContext())
 
 
+ALLOW_ALL = "User-agent: *\nAllow: /\n"
+
+
 def test_amazon():
-    http = FakeHttp({"GET amazon.jobs/en/search.json": "ats/amazon_search.json"})
-    res = REGISTRY["amazon"](Company("Amazon", 1, "amazon"), http, FetchContext())
-    params = http.calls[0][2]
+    http = FakeHttp({"GET amazon.jobs/robots.txt": ALLOW_ALL, "GET amazon.jobs/en/search.json": "ats/amazon_search.json"})
+    res = REGISTRY["amazon"](Company("Amazon", 1, "amazon", options={"tos_ok": True}), http, FetchContext())
+    params = [c for c in http.calls if "search.json" in c[1]][0][2]
     assert params["country[]"] == ["USA", "CAN"] and params["offset"] == 0
     a, b = (enrich(p) for p in res.postings)
     assert a.url == "https://www.amazon.jobs/en/jobs/3100001/software-development-engineer-i-aws"
@@ -118,8 +122,9 @@ def test_amazon():
 
 
 def test_eightfold_microsoft():
-    http = FakeHttp({"GET apply.careers.microsoft.com/api/apply/v2/jobs": "ats/eightfold_jobs.json"})
-    c = Company("Microsoft", 2, "microsoft", "apply.careers.microsoft.com|microsoft.com")
+    http = FakeHttp({"GET apply.careers.microsoft.com/robots.txt": HttpError(404, "x"),
+                     "GET apply.careers.microsoft.com/api/apply/v2/jobs": "ats/eightfold_jobs.json"})
+    c = Company("Microsoft", 2, "microsoft", "apply.careers.microsoft.com|microsoft.com", options={"tos_ok": True})
     res = REGISTRY["microsoft"](c, http, FetchContext())
     assert len(res.postings) == 1  # same id from both location queries is deduped
     p = enrich(res.postings[0])

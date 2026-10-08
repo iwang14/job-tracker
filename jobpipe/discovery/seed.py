@@ -20,7 +20,7 @@ from ..models import slugify
 from .ats_detect import Detection, detect, probe, verify
 
 
-BIG = ("amazon", "microsoft", "google", "meta", "apple")
+BIG = ("amazon", "microsoft", "google", "meta", "apple", "atlassian", "auto", "sitemap")
 
 
 def detect_seed(entry: dict, http: Http) -> dict:

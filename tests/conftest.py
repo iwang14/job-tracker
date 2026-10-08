@@ -56,6 +56,13 @@ class FakeHttp(Http):
         raise HttpError(404, url, "no fake route")
 
 
+@pytest.fixture(autouse=True)
+def _fresh_robots_cache():
+    from jobpipe import robots
+    robots.clear_cache()
+    yield
+
+
 @pytest.fixture
 def settings() -> Settings:
     return load_settings(CONFIG / "settings.yaml", CONFIG / "profile.yaml")

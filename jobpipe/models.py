@@ -27,6 +27,11 @@ class Company:
         return slugify(self.name)
 
     @property
+    def source(self) -> str:
+        """The `source` value this company's postings are stored under."""
+        return {"microsoft": "eightfold"}.get(self.ats_type, self.ats_type)
+
+    @property
     def fetcher_key(self) -> str:
         """Identity used for fetcher health tracking."""
         return f"{self.ats_type}:{self.board_token or self.key}"
@@ -100,3 +105,5 @@ class FetchResult:
     complete: bool = True
     # unchanged=True means the board answered 304 Not Modified: every known posting is still open.
     unchanged: bool = False
+    # ats_type "auto": the candidate board that answered (persisted by the pipeline)
+    resolved: "Company | None" = None

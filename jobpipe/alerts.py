@@ -90,7 +90,8 @@ def build_digest(db: DB, cfg: dict, now: datetime) -> str:
     since = db.kv_get("digest_last_sent_at") or (now - timedelta(days=1)).isoformat()
     rows = db.query(
         "SELECT * FROM postings WHERE passes_filters=1 AND duplicate_of IS NULL AND status='open' "
-        "AND first_seen_at>=? ORDER BY score DESC", (since,))
+        "AND first_seen_at>=? AND (COALESCE(score, 0)>=? OR tier=1) ORDER BY score DESC",
+        (since, int(cfg.get("digest_min_score", 0))))
     canada = [r for r in rows if "CA" in (r["country"] or "").split("|") or r["remote_scope"] in ("Canada", "North America", "Global")]
     us = [r for r in rows if r not in canada]
     local = _local(now, cfg.get("timezone", "America/Toronto"))
@@ -133,11 +134,16 @@ def build_weekly(db: DB, cfg: dict, now: datetime, stats: dict | None) -> str:
                          "AND duplicate_of IS NULL GROUP BY company ORDER BY n DESC LIMIT 8", (since,))
     reasons = db.query("SELECT substr(filter_reason, 1, instr(filter_reason||':', ':')-1) r, COUNT(*) n FROM postings "
                        "WHERE first_seen_at>=? AND passes_filters=0 GROUP BY r ORDER BY n DESC", (since,))
+    hidden = db.query("SELECT COUNT(*) n FROM postings WHERE first_seen_at>=? AND passes_filters=1 AND duplicate_of IS NULL "
+                      "AND COALESCE(score, 0)<? AND tier<>1", (since, int(cfg.get("digest_min_score", 0))))[0]["n"]
     lines = ["📊 **Weekly summary**",
              f"Funnel (7d): {total} new postings → {passed} passed filters → {alerted} instant alerts · {closed} closed",
              "Filtered out by: " + ", ".join(f"{r['r'] or '?'} {r['n']}" for r in reasons),
              "Most active (all): " + ", ".join(f"{r['company']} {r['n']}" for r in top),
              "Most matching: " + ", ".join(f"{r['company']} {r['n']}" for r in top_match)]
+    if hidden:
+        lines.append(f"Hidden by min score: {hidden} matching postings (mostly community listings without a "
+                     "description). Lower sheet.min_score / alerts.digest_min_score to see them.")
     if stats:
         n, cb, rate = stats["overall"]
         week = stats["per_week"][-1][1] if stats.get("per_week") else 0

@@ -186,3 +186,21 @@ def test_http_etag_retry_and_ua(db, monkeypatch):
     r = http.get("https://api.example/jobs", conditional=True)
     assert r.not_modified and seen[-1]["If-None-Match"] == 'W/"abc"'
     assert "jobpipe" in Http().user_agent
+
+
+def test_http_connection_errors_become_httperror(monkeypatch):
+    import requests
+    from jobpipe.http import HttpError
+    http = Http(min_interval=0, retries=1)
+    monkeypatch.setattr(Http, "_backoff", staticmethod(lambda *a: None))
+
+    class S:
+        headers = {}
+
+        def request(self, *a, **k):
+            raise requests.exceptions.ProxyError("tunnel 403")
+
+    http._local.session = S()
+    with pytest.raises(HttpError) as e:
+        http.get("https://x.example/jobs")
+    assert e.value.status == 0 and "ProxyError" in str(e.value)

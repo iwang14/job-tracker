@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS postings (
     alerted_at TEXT,
     bootstrap INTEGER NOT NULL DEFAULT 0,
     user_status TEXT,
+    enrich_tried INTEGER NOT NULL DEFAULT 0,
     UNIQUE (company_key, source, external_id)
 );
 CREATE INDEX IF NOT EXISTS idx_postings_board ON postings (company_key, source, status);
@@ -150,8 +151,19 @@ class DB:
         self.conn = sqlite3.connect(self.path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate()
         self.conn.execute("PRAGMA user_version = %d" % SCHEMA_VERSION)
         self.conn.commit()
+
+    # columns added after the first release; ALTER TABLE keeps existing state files working
+    ADDED_COLUMNS = {"postings": {"user_status": "TEXT", "enrich_tried": "INTEGER NOT NULL DEFAULT 0"}}
+
+    def _migrate(self) -> None:
+        for table, cols in self.ADDED_COLUMNS.items():
+            have = {r["name"] for r in self.conn.execute(f"PRAGMA table_info({table})")}
+            for name, decl in cols.items():
+                if name not in have:
+                    self.conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
 
     def close(self) -> None:
         self.conn.commit()

@@ -7,6 +7,7 @@ catches the fuzzy cases:
 """
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
 from urllib.parse import urlparse
@@ -19,7 +20,21 @@ TITLE_THRESHOLD = 0.92
 REPOST_WINDOW_DAYS = 45
 
 
+# Sites whose job URLs carry optional slugs/locales: reduce to the job id so links from the
+# fetcher, community lists and alert emails compare equal.
+_JOB_ID_URLS = [
+    (re.compile(r"amazon\.jobs/(?:[a-z]{2}(?:-[a-z]{2})?/)?jobs/(\d+)", re.I), "amazon.jobs/jobs/{}"),
+    (re.compile(r"careers\.microsoft\.com/.*?(?:job|jobs)/(\d{6,})", re.I), "careers.microsoft.com/job/{}"),
+    (re.compile(r"icims\.com/jobs/(\d+)", re.I), "icims/{}"),
+    (re.compile(r"greenhouse\.io/[^/]+/jobs/(\d+)|[?&]gh_jid=(\d+)", re.I), "greenhouse/{}"),
+]
+
+
 def canonical_url(url: str) -> str:
+    for rx, fmt in _JOB_ID_URLS:
+        m = rx.search(url or "")
+        if m:
+            return fmt.format(next(g for g in m.groups() if g))
     u = urlparse(url or "")
     return (u.netloc.lower().removeprefix("www.") + u.path.rstrip("/")).lower()
 

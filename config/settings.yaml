@@ -98,6 +98,7 @@ alerts:
   instant_max_per_run: 10
   digest_hour: 8                # local time; the first run at/after this hour sends the digest
   digest_max_per_section: 25
+  digest_min_score: 25          # same idea as sheet.min_score (Tier 1 always included)
   weekly_weekday: 0             # Monday
   fetcher_failure_runs: 3
 
@@ -105,10 +106,37 @@ sheet:
   postings_window_days: 21      # new matching postings from the last N days are added
   prune_closed_after_days: 14   # closed rows with Status new/skipped are removed after N days
   follow_up_days: 10            # reminder if an active application has no update for N days
+  min_score: 25                 # don't add postings scoring below this (Tier 1 always shown)
 
-# Community-maintained GitHub job lists (README tables). Raw README URLs only.
+# Community-maintained GitHub job lists. `type: simplify_json` reads SimplifyJobs' structured
+# listings (exact posted dates, locations, sponsorship); otherwise README tables are parsed.
 community_sources:
   - name: simplify-newgrad
-    url: https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/README.md
+    type: simplify_json
+    url: https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/.github/scripts/listings.json
+    max_age_days: 45
   - name: speedyapply-newgrad-usa
     url: https://raw.githubusercontent.com/speedyapply/2026-SWE-College-Jobs/main/NEW_GRAD_USA.md
+
+# Community postings whose apply link is a public Greenhouse/Lever/Ashby job get their full
+# description fetched (so they score properly and the YOE filter applies). Capped per run.
+community_enrich:
+  enabled: true
+  max_per_run: 15
+
+# Official job-alert emails -> postings (ToS-clean route for Amazon / Microsoft). See README.
+# Needs secrets EMAIL_IMAP_USER + EMAIL_IMAP_PASSWORD (Gmail app password).
+email_alerts:
+  enabled: false
+  imap_host: imap.gmail.com
+  folder: jobpipe               # Gmail label your alert emails are filtered into
+  lookback_days: 3
+  rules:
+    - company: Amazon
+      from: amazon
+      link: 'amazon\.jobs/(?:[a-z]{2}(?:-[a-z]{2})?/)?jobs/(\d+)'
+      url_template: "https://www.amazon.jobs/en/jobs/{id}"
+    - company: Microsoft
+      from: microsoft
+      link: 'careers\.microsoft\.com/[^\s"<>]*?(?:job|jobs)/(\d{6,})'
+      url_template: "https://apply.careers.microsoft.com/careers/job/{id}"

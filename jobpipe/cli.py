@@ -122,7 +122,7 @@ class RecordingHttp(Http):
 
 def cmd_verify(args) -> int:
     """Hit each (enabled, or --company) board once and sanity-check the parsed output. No DB writes."""
-    from .fetchers.base import FetchContext
+    from .fetchers.base import FetchContext, FetcherDisabled
     companies = [c for c in load_companies() if (args.company and c.name.lower() in [n.lower() for n in args.company])
                  or (not args.company and c.enabled)]
     out_dir = Path(args.record) if args.record else None
@@ -142,6 +142,8 @@ def cmd_verify(args) -> int:
             bad += not ok
             print(f"{'OK ' if ok else 'BAD'} {c.name:<28} {c.ats_type:<15} postings={n:<5} with_description={with_desc:<5}"
                   + (f" e.g. {sample.title!r} @ {sample.location_raw!r} {sample.url}" if sample else ""))
+        except FetcherDisabled as e:
+            print(f"SKIP {c.name:<27} {c.ats_type:<15} {e}")
         except Exception as e:  # noqa: BLE001
             bad += 1
             print(f"ERR {c.name:<28} {c.ats_type:<15} {type(e).__name__}: {str(e)[:200]}")

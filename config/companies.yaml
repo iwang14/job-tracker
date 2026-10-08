@@ -5,11 +5,17 @@
 # Add one:   python -m jobpipe detect https://company.com/careers --name "Company" --tier 2
 # UNVERIFIED tokens below were written without network access to these APIs: run the
 # "verify" workflow once (Actions -> jobpipe -> Run workflow -> verify) and fix any ERR rows.
+# tos_ok: true  = you've read that site's terms and allow jobpipe to use its undocumented endpoint
+#                 (robots.txt is still checked live on every run). Public ATS APIs don't need it.
 companies:
   # --- Tier 1 ---
-  - {name: Shopify, tier: 1, ats_type: greenhouse, board_token: shopify, careers_url: "https://www.shopify.com/careers"}   # UNVERIFIED
-  - {name: Atlassian, tier: 1, ats_type: lever, board_token: atlassian, careers_url: "https://www.atlassian.com/company/careers/all-jobs"}   # UNVERIFIED
-  - {name: Amazon, tier: 1, ats_type: amazon, careers_url: "https://www.amazon.jobs", enabled: false, query: "software development engineer", countries: [USA, CAN]}   # off until you review amazon.jobs terms
+  # Shopify hosts its own careers site (shopify.com/careers/<slug>_<uuid>). `auto` tries the public
+  # ATS boards first and locks in whichever answers; the sitemap fallback needs tos_ok: true.
+  - {name: Shopify, tier: 1, ats_type: auto, careers_url: "https://www.shopify.com/careers", candidates: ["ashby:shopify", "lever:shopify", "greenhouse:shopify", "smartrecruiters:Shopify", {ats_type: sitemap, url_pattern: "/careers/[a-z0-9-]+_[0-9a-f-]{36}"}], tos_ok: false}
+  # Atlassian applies through iCIMS; its careers page renders from a JSON listing endpoint.
+  - {name: Atlassian, tier: 1, ats_type: atlassian, careers_url: "https://www.atlassian.com/company/careers/all-jobs", tos_ok: false}
+  # Undocumented search API. Until tos_ok: true, Amazon comes in via SimplifyJobs + your alert emails.
+  - {name: Amazon, tier: 1, ats_type: amazon, careers_url: "https://www.amazon.jobs", query: "software development engineer", countries: [USA, CAN], tos_ok: false}
   # --- Tier 2 ---
   - {name: Stripe, tier: 2, ats_type: greenhouse, board_token: stripe}
   - {name: Datadog, tier: 2, ats_type: greenhouse, board_token: datadog}
@@ -24,4 +30,4 @@ companies:
   - {name: Plaid, tier: 2, ats_type: lever, board_token: plaid}
   - {name: NVIDIA, tier: 2, ats_type: workday, board_token: nvidia/wd5/NVIDIAExternalCareerSite, search_text: software engineer}
   - {name: Visa, tier: 3, ats_type: smartrecruiters, board_token: Visa}
-  - {name: Microsoft, tier: 2, ats_type: microsoft, board_token: "apply.careers.microsoft.com|microsoft.com", enabled: false, query: software engineer}   # off: undocumented endpoint
+  - {name: Microsoft, tier: 2, ats_type: microsoft, board_token: "apply.careers.microsoft.com|microsoft.com", query: software engineer, tos_ok: false}   # undocumented; see Amazon note

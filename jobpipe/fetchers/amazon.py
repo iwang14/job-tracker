@@ -3,15 +3,18 @@
 GET https://www.amazon.jobs/en/search.json?base_query=...&category[]=software-development
     &country[]=USA&country[]=CAN&result_limit=100&offset=N&sort=recent
 
-UNDOCUMENTED endpoint: disabled by default in companies.yaml until you've reviewed
-amazon.jobs' terms and run `python -m jobpipe verify --company Amazon`. Parameter names are
-overridable via `params:` in companies.yaml in case the site changes them.
+UNDOCUMENTED endpoint, gated by jobpipe.robots: runs only with `tos_ok: true` on the company
+(after you've reviewed amazon.jobs' terms) AND when amazon.jobs/robots.txt allows the URL.
+Parameter names are overridable via `params:` in companies.yaml in case the site changes them.
+ToS-clean alternatives that need no opt-in: the SimplifyJobs listings source and Amazon's own
+job-alert emails (email_alerts in settings.yaml).
 """
 from __future__ import annotations
 
 from ..http import Http
 from ..models import Company, FetchResult, Location, Posting
 from ..normalize import ISO3, html_to_text, to_iso
+from ..robots import require_allowed
 from .base import FetchContext
 
 API = "https://www.amazon.jobs/en/search.json"
@@ -26,6 +29,7 @@ def fetch(company: Company, http: Http, ctx: FetchContext) -> FetchResult:
         "result_limit": PAGE, "sort": "recent",
     }
     params.update(company.options.get("params", {}))
+    require_allowed(company, http, API + "?base_query=software&offset=0")
     out, offset, complete = [], 0, True
     max_pages = min(ctx.max_pages, int(company.options.get("max_pages", 10)))
     for _ in range(max_pages):
